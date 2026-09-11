@@ -48,15 +48,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci --omit=dev
 
-      - name: Deploy to your hosting platform
-        run: |
-          echo "App built successfully for server deployment"
-          # Replace this with your actual deployment command
-          # Examples:
-          # - Vercel: vercel --prod
-          # - AWS: aws s3 sync .next s3://your-bucket
-          # - DigitalOcean: your deployment script
+      - name: Start server
+        run: npm run start
