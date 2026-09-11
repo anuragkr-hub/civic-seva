@@ -18,7 +18,47 @@ import {
 import Link from 'next/link';
 
 export default function CitizenDashboardPage() {
-  const { incidents, t } = useApp();
+  const { incidents, t, isAuthenticated, login } = useApp();
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center space-y-6">
+        <div className="w-16 h-16 rounded-3xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto shadow-sm">
+          <Sparkles className="w-8 h-8" />
+        </div>
+        <div>
+          <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-bold uppercase tracking-wider">
+            Citizen Profile Required
+          </span>
+          <h2 className="text-2xl font-bold text-slate-900 mt-2">
+            My Civic Activity
+          </h2>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+            Please sign in to track your submitted reports, view community confirmations, and inspect completed government work.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <Link
+            href="/login?redirect=/citizen"
+            className="w-full block py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all hover:scale-105"
+          >
+            Sign In to View Your Activity &rarr;
+          </Link>
+
+          <div className="pt-3 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => login('citizen', { name: 'Suvro Mukherjee', emailOrPhone: 'suvro@kolkata.in', ward: 48 })}
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-orange-50 hover:border-orange-300 border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>⚡ 1-Click Fast Citizen Demo Login</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalReports = incidents.length + 6;
   const activeCount = incidents.filter((i) => i.status !== 'verified_resolved').length;

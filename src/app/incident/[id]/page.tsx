@@ -36,7 +36,7 @@ import Link from 'next/link';
 export default function IncidentDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { role, refreshIncidents, addNotification } = useApp();
+  const { role, refreshIncidents, addNotification, isAuthenticated, user } = useApp();
 
   const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
   const [incident, setIncident] = useState<CivicIncident | null>(null);
@@ -85,7 +85,11 @@ export default function IncidentDetailPage() {
   }
 
   const handleConfirm = () => {
-    const updated = addCommunityConfirmation(incident.id, 'citizen_viewer_' + Date.now());
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/incident/${incident.id}`);
+      return;
+    }
+    const updated = addCommunityConfirmation(incident.id, user?.id || 'citizen_viewer_' + Date.now());
     if (updated) {
       setIncident({ ...updated });
       refreshIncidents();
@@ -99,10 +103,14 @@ export default function IncidentDetailPage() {
   };
 
   const handleAuthorityStatusUpdate = (status: IncidentStatus, note: string) => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/incident/${incident.id}`);
+      return;
+    }
     const updated = updateIncidentStatus(
       incident.id,
       status,
-      'KMC Executive Engineer (Borough Ops)',
+      user?.name || 'KMC Executive Engineer (Borough Ops)',
       note
     );
     if (updated) {
@@ -118,6 +126,10 @@ export default function IncidentDetailPage() {
   };
 
   const handleMarkResolvedByAuthority = () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/incident/${incident.id}`);
+      return;
+    }
     const updated = submitAuthorityResolution(
       incident.id,
       authorityNote || 'Repair and maintenance work finalized per municipal safety standards.',
@@ -136,6 +148,10 @@ export default function IncidentDetailPage() {
   };
 
   const handleEscalate = () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/incident/${incident.id}`);
+      return;
+    }
     const updated = triggerEscalation(incident.id, escalationReason);
     if (updated) {
       setIncident({ ...updated });

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CivicIncident, VerificationOutcome } from '../../types';
 import { compareBeforeAndAfterAI, BeforeAfterComparison } from '../../lib/aiEngine';
 import { submitCitizenVerification } from '../../lib/storage';
@@ -26,7 +27,8 @@ export const BeforeAfterVerify: React.FC<BeforeAfterVerifyProps> = ({
   incident,
   onVerificationComplete
 }) => {
-  const { addNotification, role } = useApp();
+  const router = useRouter();
+  const { addNotification, role, isAuthenticated } = useApp();
   const [sliderPosition, setSliderPosition] = useState(50);
   const [selectedVerdict, setSelectedVerdict] = useState<VerificationOutcome>('completely_fixed');
   const [citizenNotes, setCitizenNotes] = useState(
@@ -75,6 +77,11 @@ export const BeforeAfterVerify: React.FC<BeforeAfterVerifyProps> = ({
   };
 
   const handleConfirmVerification = () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/incident/${incident.id}`);
+      return;
+    }
+
     const score = comparisonResult?.confidenceScore || 92;
     const label = comparisonResult?.verdict || 'appears_resolved';
 

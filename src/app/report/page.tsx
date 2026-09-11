@@ -86,7 +86,7 @@ const SAMPLE_PRESETS = [
 
 export default function ReportPage() {
   const router = useRouter();
-  const { incidents, refreshIncidents, addNotification } = useApp();
+  const { incidents, refreshIncidents, addNotification, isAuthenticated, login } = useApp();
 
   // Multi-step state (1 to 7)
   const [currentStep, setCurrentStep] = useState(1);
@@ -322,6 +322,53 @@ export default function ReportPage() {
     'Official Email',
     'Submitted'
   ];
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center space-y-6">
+        <div className="w-16 h-16 rounded-3xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto shadow-sm">
+          <Sparkles className="w-8 h-8" />
+        </div>
+        <div>
+          <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-bold uppercase tracking-wider">
+            Registration Required
+          </span>
+          <h2 className="text-2xl font-bold text-slate-900 mt-2">
+            Sign In to Report a Civic Issue
+          </h2>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+            Kolkata Municipal Corporation requires verified citizen reporting to assign priority, route departments, and prevent spam.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <Link
+            href="/login?redirect=/report"
+            className="w-full block py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all hover:scale-105"
+          >
+            Sign In to Start Reporting &rarr;
+          </Link>
+
+          <Link
+            href="/login?redirect=/report&tab=register"
+            className="w-full block py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+          >
+            Create New Citizen Account
+          </Link>
+
+          <div className="pt-3 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => login('citizen', { name: 'Suvro Mukherjee', emailOrPhone: 'suvro@kolkata.in', ward: 48 })}
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-orange-50 hover:border-orange-300 border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>⚡ 1-Click Fast Citizen Demo Login</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6">

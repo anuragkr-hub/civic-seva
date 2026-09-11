@@ -21,8 +21,48 @@ import {
 import Link from 'next/link';
 
 export default function AuthorityDashboardPage() {
-  const { incidents, refreshIncidents, addNotification } = useApp();
+  const { incidents, refreshIncidents, addNotification, isAuthenticated, role, login } = useApp();
   const [departmentFilter, setDepartmentFilter] = useState('all');
+
+  if (!isAuthenticated || (role !== 'authority' && role !== 'admin')) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center space-y-6">
+        <div className="w-16 h-16 rounded-3xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto shadow-sm">
+          <Shield className="w-8 h-8" />
+        </div>
+        <div>
+          <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold uppercase tracking-wider">
+            Officer Clearance Required
+          </span>
+          <h2 className="text-2xl font-bold text-slate-900 mt-2">
+            KMC Operations Queue
+          </h2>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+            This operational dashboard and priority queue is restricted to authorized Kolkata Municipal Corporation engineers and department officers.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <Link
+            href="/login?redirect=/authority"
+            className="w-full block py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition-all hover:scale-105"
+          >
+            Sign In with KMC Credentials &rarr;
+          </Link>
+
+          <div className="pt-3 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => login('authority', { name: 'Er. A. K. Sengupta', emailOrPhone: 'roads.kmc.demo@kmcgov.in.demo', department: 'Civil Infrastructure & Roads' })}
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-blue-50 hover:border-blue-300 border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>⚡ 1-Click Fast Officer Demo Login</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Calculations
   const criticalCount = incidents.filter((i) => i.severity === 'critical').length;
