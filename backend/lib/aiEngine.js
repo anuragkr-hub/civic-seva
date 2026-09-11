@@ -1,4 +1,4 @@
-npmfunction analyzeUploadedImage(fileNameOrHint, userHint = '') {
+function analyzeUploadedImage(fileNameOrHint, userHint = '')  {
   const lower = (fileNameOrHint + ' ' + userHint).toLowerCase();
 
   if (lower.includes('manhole') || lower.includes('drain_open') || lower.includes('cover')) {
