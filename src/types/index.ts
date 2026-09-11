@@ -47,6 +47,8 @@ export interface User {
   role: UserRole;
   language: SupportedLanguage;
   ward?: number;
+  department?: string;
+  password?: string;
   avatar?: string;
 }
 

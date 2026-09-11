@@ -1,28 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { CivicIncident, IncidentStatus } from '../../types';
 import {
   Shield,
   Flame,
   AlertTriangle,
   CheckCircle,
   Clock,
-  ArrowUpRight,
   TrendingUp,
   MapPin,
-  Filter,
-  FileCheck,
-  ChevronRight,
-  Activity,
-  Layers
+  FileCheck
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthorityDashboardPage() {
-  const { incidents, refreshIncidents, addNotification, isAuthenticated, role, login } = useApp();
-  const [departmentFilter, setDepartmentFilter] = useState('all');
+  const { incidents, isAuthenticated, role, login, t } = useApp();
 
   if (!isAuthenticated || (role !== 'authority' && role !== 'admin')) {
     return (
@@ -32,13 +25,16 @@ export default function AuthorityDashboardPage() {
         </div>
         <div>
           <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold uppercase tracking-wider">
-            Officer Clearance Required
+            {t('officerClearanceRequired', 'Officer Clearance Required')}
           </span>
           <h2 className="text-2xl font-bold text-slate-900 mt-2">
-            KMC Operations Queue
+            {t('authorityTitle', 'KMC Operations Queue')}
           </h2>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-            This operational dashboard and priority queue is restricted to authorized Kolkata Municipal Corporation engineers and department officers.
+            {t(
+              'officerSignInNotice',
+              'This operational dashboard and priority queue is restricted to authorized Kolkata Municipal Corporation engineers and department officers.'
+            )}
           </p>
         </div>
 
@@ -47,16 +43,20 @@ export default function AuthorityDashboardPage() {
             href="/login?redirect=/authority"
             className="w-full block py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition-all hover:scale-105"
           >
-            Sign In with KMC Credentials &rarr;
+            {t('signIn', 'Sign In')} &rarr;
           </Link>
 
           <div className="pt-3 border-t border-slate-200">
             <button
               type="button"
-              onClick={() => login('authority', { name: 'Er. A. K. Sengupta', emailOrPhone: 'roads.kmc.demo@kmcgov.in.demo', department: 'Civil Infrastructure & Roads' })}
+              onClick={() =>
+                login('authority', {
+                  emailOrPhone: 'roads.kmc.demo@kmcgov.in.demo'
+                })
+              }
               className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-blue-50 hover:border-blue-300 border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 transition-colors"
             >
-              <span>⚡ 1-Click Fast Officer Demo Login</span>
+              <span>{t('quickOfficerDemo', '⚡ 1-Click Fast Officer Demo Login')}</span>
             </button>
           </div>
         </div>
@@ -68,7 +68,9 @@ export default function AuthorityDashboardPage() {
   const criticalCount = incidents.filter((i) => i.severity === 'critical').length;
   const highPriorityCount = incidents.filter((i) => i.severity === 'high').length;
   const unresolvedCount = incidents.filter((i) => i.status !== 'verified_resolved').length;
-  const resolvedCount = incidents.filter((i) => i.status === 'marked_resolved' || i.status === 'verified_resolved').length;
+  const resolvedCount = incidents.filter(
+    (i) => i.status === 'marked_resolved' || i.status === 'verified_resolved'
+  ).length;
   const awaitingVerifyCount = incidents.filter((i) => i.status === 'marked_resolved').length;
   const overdueCount = incidents.filter((i) => i.status === 'escalated').length || 1;
 
@@ -77,7 +79,10 @@ export default function AuthorityDashboardPage() {
 
   const verifiedRate = Math.round(
     (incidents.filter((i) => i.status === 'verified_resolved').length /
-      Math.max(1, incidents.filter((i) => i.status === 'marked_resolved' || i.status === 'verified_resolved').length)) *
+      Math.max(
+        1,
+        incidents.filter((i) => i.status === 'marked_resolved' || i.status === 'verified_resolved').length
+      )) *
       100
   );
 
@@ -89,97 +94,96 @@ export default function AuthorityDashboardPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-600/30 text-orange-400 font-bold text-xs border border-orange-500/40">
               <Shield className="w-3.5 h-3.5" />
-              KMC OPERATIONS CONTROL DESK
+              {t('authorityDesk', 'KMC OPERATIONS CONTROL DESK')}
             </span>
             <span className="text-xs text-slate-400 font-mono">
-              Live Kolkata Grid
+              {t('liveKolkataGrid', 'Live Kolkata Grid')}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Municipal Command &amp; Priority Queue
+            {t('authorityTitle', 'Municipal Command & Priority Queue')}
           </h1>
           <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-            Autonomous triage ranking driven by the 0–100 Civic Priority Engine. Incidents are prioritized by public safety hazard and citizen density rather than chronological FIFO queues.
+            {t(
+              'authoritySubtitle',
+              'Autonomous triage ranking driven by the 0–100 Civic Priority Engine. Incidents are prioritized by public safety hazard and citizen density.'
+            )}
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="bg-slate-800 border border-slate-700 p-4 rounded-xl text-center">
-            <div className="text-xs text-slate-400">Citizen Verified Rate</div>
-            <div className="text-2xl font-extrabold text-emerald-400 mt-0.5">
-              {verifiedRate}%
-            </div>
-            <div className="text-[10px] text-slate-400">Audit-Approved</div>
+            <div className="text-xs text-slate-400">{t('verifiedRate', 'Citizen Verified Rate')}</div>
+            <div className="text-2xl font-extrabold text-emerald-400 mt-0.5">{verifiedRate}%</div>
+            <div className="text-[10px] text-slate-400">{t('auditApproved', 'Audit-Approved')}</div>
           </div>
         </div>
       </div>
 
-      {/* Main Metric Cards Grid (Section 20) */}
+      {/* Main Metric Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="bg-white p-4 rounded-2xl border border-red-200 shadow-soft">
           <div className="text-xs font-bold text-red-600 uppercase flex items-center gap-1">
             <Flame className="w-4 h-4" />
-            Critical Issues
+            {t('criticalIssues', 'Critical Issues')}
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">
-            {criticalCount}
+          <div className="text-2xl font-black text-slate-900 mt-2">{criticalCount}</div>
+          <div className="text-[10px] text-red-500 font-medium mt-0.5">
+            {t('immediateDanger', 'Immediate danger')}
           </div>
-          <div className="text-[10px] text-red-500 font-medium mt-0.5">Immediate danger</div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-orange-200 shadow-soft">
           <div className="text-xs font-bold text-orange-600 uppercase flex items-center gap-1">
             <TrendingUp className="w-4 h-4" />
-            High Priority
+            {t('highPriority', 'High Priority')}
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">
-            {highPriorityCount}
+          <div className="text-2xl font-black text-slate-900 mt-2">{highPriorityCount}</div>
+          <div className="text-[10px] text-orange-600 font-medium mt-0.5">
+            {t('scoreOver70', 'Score > 70')}
           </div>
-          <div className="text-[10px] text-orange-600 font-medium mt-0.5">Score &gt; 70</div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-soft">
           <div className="text-xs font-bold text-slate-600 uppercase flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            Unresolved
+            {t('unresolved', 'Unresolved')}
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">
-            {unresolvedCount}
-          </div>
+          <div className="text-2xl font-black text-slate-900 mt-2">{unresolvedCount}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">In queue / action</div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-soft">
           <div className="text-xs font-bold text-emerald-600 uppercase flex items-center gap-1">
             <CheckCircle className="w-4 h-4" />
-            Resolved
+            {t('resolved', 'Resolved')}
           </div>
-          <div className="text-2xl font-black text-emerald-600 mt-2">
-            {resolvedCount}
+          <div className="text-2xl font-black text-emerald-600 mt-2">{resolvedCount}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">
+            {t('repairsCompleted', 'Repairs completed')}
           </div>
-          <div className="text-[10px] text-slate-400 mt-0.5">Repairs completed</div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-blue-200 shadow-soft">
           <div className="text-xs font-bold text-blue-600 uppercase flex items-center gap-1">
             <FileCheck className="w-4 h-4" />
-            Awaiting Verification
+            {t('awaitingVerify', 'Awaiting Verification')}
           </div>
-          <div className="text-2xl font-black text-blue-600 mt-2">
-            {awaitingVerifyCount}
+          <div className="text-2xl font-black text-blue-600 mt-2">{awaitingVerifyCount}</div>
+          <div className="text-[10px] text-blue-500 font-medium mt-0.5">
+            {t('citizenInspection', 'Citizen inspection')}
           </div>
-          <div className="text-[10px] text-blue-500 font-medium mt-0.5">Citizen inspection</div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-red-300 shadow-soft bg-red-50/30">
           <div className="text-xs font-bold text-red-700 uppercase flex items-center gap-1">
             <AlertTriangle className="w-4 h-4" />
-            Overdue (&gt;7d)
+            {t('overdue', 'Overdue (>7d)')}
           </div>
-          <div className="text-2xl font-black text-red-700 mt-2">
-            {overdueCount}
+          <div className="text-2xl font-black text-red-700 mt-2">{overdueCount}</div>
+          <div className="text-[10px] text-red-600 font-semibold mt-0.5">
+            {t('slaBreachNotice', 'SLA breach notice')}
           </div>
-          <div className="text-[10px] text-red-600 font-semibold mt-0.5">SLA breach notice</div>
         </div>
       </div>
 
@@ -191,14 +195,17 @@ export default function AuthorityDashboardPage() {
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-600" />
-                Dynamic Civic Priority Queue
+                {t('dynamicQueue', 'Dynamic Civic Priority Queue')}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Automatically ordered by civic impact, accident likelihood, and citizen confirmations.
+                {t(
+                  'dynamicQueueSubtitle',
+                  'Automatically ordered by civic impact, accident likelihood, and citizen confirmations.'
+                )}
               </p>
             </div>
             <span className="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-700">
-              Sorted by Priority Score &darr;
+              {t('priority', 'Priority')} &darr;
             </span>
           </div>
 
@@ -233,22 +240,24 @@ export default function AuthorityDashboardPage() {
                         {inc.categoryDisplay}
                       </span>
                       <span className="text-xs font-semibold text-slate-700">
-                        Ward {inc.ward} ({inc.borough})
+                        {t('ward', 'Ward')} {inc.ward} ({inc.borough})
                       </span>
                     </div>
 
-                    <h3 className="text-sm font-bold text-slate-900 mt-1">
-                      {inc.title}
-                    </h3>
+                    <h3 className="text-sm font-bold text-slate-900 mt-1">{inc.title}</h3>
 
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
                       <span className="text-orange-600 font-bold">
-                        Score: {inc.priorityScore}/100
+                        {t('priority', 'Score')}: {inc.priorityScore}/100
                       </span>
                       <span>•</span>
-                      <span>{inc.confirmationCount} confirmations</span>
+                      <span>
+                        {inc.confirmationCount} {t('communityConfirmations', 'confirmations')}
+                      </span>
                       <span>•</span>
-                      <span>Dept: {inc.responsibleAuthorityName.split(' ')[1] || 'Civil'}</span>
+                      <span>
+                        {t('department', 'Dept')}: {inc.responsibleAuthorityName.split(' ')[1] || 'Civil'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -258,7 +267,7 @@ export default function AuthorityDashboardPage() {
                     href={`/incident/${inc.id}`}
                     className="w-full sm:w-auto px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1 transition-transform hover:scale-105"
                   >
-                    Take Action &rarr;
+                    <span>{t('actions', 'Take Action')} &rarr;</span>
                   </Link>
                 </div>
               </div>

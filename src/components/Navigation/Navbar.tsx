@@ -8,17 +8,13 @@ import { useApp } from '../../context/AppContext';
 import { SupportedLanguage } from '../../types';
 import {
   Bell,
-  MapPin,
   PlusCircle,
-  BarChart3,
   Globe,
   Menu,
   X,
   User,
-  ShieldCheck,
   CheckCircle,
   AlertTriangle,
-  LogIn,
   LogOut,
   Shield,
   Award
@@ -27,7 +23,18 @@ import {
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, role, isAuthenticated, logout, language, setLanguage, notifications, markNotificationRead, t } = useApp();
+  const {
+    user,
+    role,
+    isAuthenticated,
+    logout,
+    language,
+    setLanguage,
+    notifications,
+    markNotificationRead,
+    t
+  } = useApp();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -43,12 +50,16 @@ export const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: isAuthenticated ? '/report' : '/login?redirect=/report', label: 'Report Issue', highlight: true },
-    { href: '/map', label: 'Civic Map' },
-    { href: getDashboardLink(), label: 'My Issues' },
-    { href: '/analytics', label: 'Civic Insights' },
-    { href: '/about', label: 'About' },
+    { href: '/', label: t('home', 'Home') },
+    {
+      href: isAuthenticated ? '/report' : '/login?redirect=/report',
+      label: t('reportIssue', 'Report Issue'),
+      highlight: true
+    },
+    { href: '/map', label: t('civicMap', 'Civic Map') },
+    { href: getDashboardLink(), label: t('myIssues', 'My Issues') },
+    { href: '/analytics', label: t('civicInsights', 'Civic Insights') },
+    { href: '/about', label: t('about', 'About') }
   ];
 
   const handleLangSelect = (lang: SupportedLanguage) => {
@@ -63,9 +74,11 @@ export const Navbar: React.FC = () => {
   };
 
   const getRoleBadge = () => {
-    if (role === 'authority') return { label: 'KMC Officer', bg: 'bg-blue-600', icon: Shield };
-    if (role === 'admin') return { label: 'Admin', bg: 'bg-purple-600', icon: Award };
-    return { label: 'Citizen', bg: 'bg-orange-600', icon: User };
+    if (role === 'authority')
+      return { label: t('roleAuthority', 'KMC Officer'), bg: 'bg-blue-600', icon: Shield };
+    if (role === 'admin')
+      return { label: t('roleAdmin', 'Admin'), bg: 'bg-purple-600', icon: Award };
+    return { label: t('roleCitizen', 'Citizen'), bg: 'bg-orange-600', icon: User };
   };
 
   const roleInfo = getRoleBadge();
@@ -125,30 +138,39 @@ export const Navbar: React.FC = () => {
             </button>
 
             {langMenuOpen && (
-              <div className="absolute right-0 mt-2 w-36 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in">
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in">
                 <button
                   onClick={() => handleLangSelect('en')}
-                  className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between ${
-                    language === 'en' ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                  className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between ${
+                    language === 'en'
+                      ? 'bg-orange-50 text-orange-600 font-semibold'
+                      : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  English {language === 'en' && '✓'}
+                  <span>English</span>
+                  {language === 'en' && <span className="text-orange-600 font-bold">✓</span>}
                 </button>
                 <button
                   onClick={() => handleLangSelect('bn')}
-                  className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between ${
-                    language === 'bn' ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                  className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between ${
+                    language === 'bn'
+                      ? 'bg-orange-50 text-orange-600 font-semibold'
+                      : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  বাংলা (Bengali) {language === 'bn' && '✓'}
+                  <span>বাংলা (Bengali)</span>
+                  {language === 'bn' && <span className="text-orange-600 font-bold">✓</span>}
                 </button>
                 <button
                   onClick={() => handleLangSelect('hi')}
-                  className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between ${
-                    language === 'hi' ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                  className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between ${
+                    language === 'hi'
+                      ? 'bg-orange-50 text-orange-600 font-semibold'
+                      : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  हिन्दी (Hindi) {language === 'hi' && '✓'}
+                  <span>हिन्दी (Hindi)</span>
+                  {language === 'hi' && <span className="text-orange-600 font-bold">✓</span>}
                 </button>
               </div>
             )}
@@ -173,9 +195,11 @@ export const Navbar: React.FC = () => {
               <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-50">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div className="font-semibold text-xs text-slate-800 uppercase tracking-wider">
-                    Civic Alerts ({unreadCount} new)
+                    {t('alerts', 'Civic Alerts')} ({unreadCount} new)
                   </div>
-                  <span className="text-[11px] text-slate-400">Real-time KMC feed</span>
+                  <span className="text-[11px] text-slate-400">
+                    {t('realTimeFeed', 'Real-time KMC feed')}
+                  </span>
                 </div>
 
                 <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto mt-2">
@@ -226,7 +250,9 @@ export const Navbar: React.FC = () => {
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
               >
-                <div className={`w-6 h-6 rounded-full ${roleInfo.bg} text-white flex items-center justify-center text-[10px] font-bold`}>
+                <div
+                  className={`w-6 h-6 rounded-full ${roleInfo.bg} text-white flex items-center justify-center text-[10px] font-bold`}
+                >
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div className="text-left hidden sm:block leading-none">
@@ -243,8 +269,12 @@ export const Navbar: React.FC = () => {
                 <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in">
                   <div className="px-4 py-2 border-b border-slate-100">
                     <div className="text-xs font-bold text-slate-900 truncate">{user.name}</div>
-                    <div className="text-[11px] text-slate-500 truncate">{user.email || user.phone}</div>
-                    <span className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-[10px] font-bold text-white ${roleInfo.bg}`}>
+                    <div className="text-[11px] text-slate-500 truncate">
+                      {user.email || user.phone}
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-[10px] font-bold text-white ${roleInfo.bg}`}
+                    >
                       <RoleIcon className="w-3 h-3" />
                       {roleInfo.label}
                     </span>
@@ -256,14 +286,14 @@ export const Navbar: React.FC = () => {
                       onClick={() => setUserDropdownOpen(false)}
                       className="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium"
                     >
-                      My Dashboard &amp; Activity
+                      {t('myDashboardActivity', 'My Dashboard & Activity')}
                     </Link>
                     <Link
                       href="/map"
                       onClick={() => setUserDropdownOpen(false)}
                       className="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium"
                     >
-                      Civic Map
+                      {t('civicMap', 'Civic Map')}
                     </Link>
                   </div>
 
@@ -273,7 +303,7 @@ export const Navbar: React.FC = () => {
                       className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-1.5 transition-colors"
                     >
                       <LogOut className="w-3.5 h-3.5" />
-                      Sign Out
+                      {t('signOut', 'Sign Out')}
                     </button>
                   </div>
                 </div>
@@ -285,13 +315,13 @@ export const Navbar: React.FC = () => {
                 href="/login"
                 className="px-3 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                Sign In
+                {t('signIn', 'Sign In')}
               </Link>
               <Link
                 href="/login?tab=register"
                 className="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-xs font-bold text-white shadow-sm transition-all hover:scale-105 hidden sm:inline-block"
               >
-                Register
+                {t('register', 'Register')}
               </Link>
             </div>
           )}
@@ -315,7 +345,9 @@ export const Navbar: React.FC = () => {
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
               className={`block px-3 py-2 rounded-lg text-sm font-medium ${
-                pathname === link.href ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                pathname === link.href
+                  ? 'bg-orange-50 text-orange-600 font-semibold'
+                  : 'text-slate-700 hover:bg-slate-50'
               }`}
             >
               {link.label}
@@ -328,14 +360,14 @@ export const Navbar: React.FC = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex-1 text-center py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700"
               >
-                Sign In
+                {t('signIn', 'Sign In')}
               </Link>
               <Link
                 href="/login?tab=register"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex-1 text-center py-2 rounded-xl bg-orange-600 text-white text-xs font-bold"
               >
-                Register
+                {t('register', 'Register')}
               </Link>
             </div>
           )}

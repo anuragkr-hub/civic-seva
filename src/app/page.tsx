@@ -12,16 +12,11 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle,
-  ArrowRight,
-  TrendingUp,
-  Layers,
-  Activity,
-  AlertTriangle,
-  Play
+  Layers
 } from 'lucide-react';
 
 export default function HomePage() {
-  const { incidents, t } = useApp();
+  const { t } = useApp();
   const [demoActiveCategory, setDemoActiveCategory] = useState<'pothole' | 'manhole' | 'garbage'>('pothole');
 
   const demoData = {
@@ -58,27 +53,30 @@ export default function HomePage() {
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
-      {/* 1. HERO SECTION (Section 5) */}
+      {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden pt-12 sm:pt-20 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left: Copy & CTAs */}
           <div className="lg:col-span-7 space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100/80 border border-orange-200 text-orange-800 text-xs font-bold tracking-wide">
               <span className="w-2 h-2 rounded-full bg-orange-600 animate-pulse" />
-              KOLKATA CIVIC INTELLIGENCE PLATFORM
+              {t('kolkataCivicIntelligence', 'KOLKATA CIVIC INTELLIGENCE PLATFORM')}
             </div>
 
             <div className="space-y-2">
               <div className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-orange-600">
-                CivicSeva • See. Report. Resolve.
+                {t('brandName', 'CivicSeva')} • {t('tagline', 'See. Report. Resolve.')}
               </div>
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                Turn everyday civic problems into visible civic action.
+                {t('heroHeadline', 'Turn everyday civic problems into visible civic action.')}
               </h1>
             </div>
 
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
-              Report roads, potholes, garbage dumps, drainage, streetlights, and waterlogging across Kolkata. CivicSeva converts scattered complaints into structured, deduplicated, prioritized Civic Incidents with citizen-verified resolution.
+              {t(
+                'heroSubtitle',
+                'Report roads, potholes, garbage dumps, drainage, streetlights, and waterlogging across Kolkata. CivicSeva converts scattered complaints into structured, deduplicated, prioritized Civic Incidents with citizen-verified resolution.'
+              )}
             </p>
 
             {/* CTAs */}
@@ -88,14 +86,14 @@ export default function HomePage() {
                 className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold shadow-lg shadow-orange-600/20 transition-all hover:scale-105 hover:shadow-xl"
               >
                 <Camera className="w-4 h-4" />
-                Report a Civic Issue
+                {t('reportIssueCta', 'Report a Civic Issue')}
               </Link>
               <Link
                 href="/map"
                 className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 text-sm font-bold shadow-sm transition-all hover:border-slate-400"
               >
                 <MapPin className="w-4 h-4 text-orange-600" />
-                Explore Civic Map
+                {t('exploreMapCta', 'Explore Civic Map')}
               </Link>
             </div>
 
@@ -103,15 +101,15 @@ export default function HomePage() {
             <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-slate-500 border-t border-slate-200/80">
               <span className="flex items-center gap-1.5 font-semibold text-slate-700">
                 <CheckCircle className="w-4 h-4 text-emerald-600" />
-                144 KMC Wards
+                {t('kmc144Wards', '144 KMC Wards')}
               </span>
               <span className="flex items-center gap-1.5 font-semibold text-slate-700">
                 <Shield className="w-4 h-4 text-orange-600" />
-                Direct KMC Dept Routing
+                {t('directKmcDeptRouting', 'Direct KMC Dept Routing')}
               </span>
               <span className="flex items-center gap-1.5 font-semibold text-slate-700">
                 <Sparkles className="w-4 h-4 text-purple-600" />
-                AI Before/After Verification
+                {t('aiBeforeAfterVerification', 'AI Before/After Verification')}
               </span>
             </div>
           </div>
@@ -175,10 +173,10 @@ export default function HomePage() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/70 backdrop-blur-sm rounded text-white text-[10px] font-bold">
-                  AI Confidence: {activeDemo.confidence}%
+                  {t('confidence', 'AI Confidence')}: {activeDemo.confidence}%
                 </div>
                 <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-orange-600 text-white rounded text-[10px] font-extrabold shadow">
-                  Priority: {activeDemo.priority}/100
+                  {t('priority', 'Priority')}: {activeDemo.priority}/100
                 </div>
               </div>
 
@@ -186,7 +184,7 @@ export default function HomePage() {
               <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 text-xs">
                 <div className="font-bold text-slate-900">{activeDemo.title}</div>
                 <div className="text-[11px] text-slate-500">
-                  📍 {activeDemo.location} • Ward {activeDemo.ward}
+                  📍 {activeDemo.location} • {t('ward', 'Ward')} {activeDemo.ward}
                 </div>
                 <div className="text-[11px] text-orange-700 font-semibold pt-1 border-t border-slate-200">
                   ⚡ Auto-Routed to: {activeDemo.authority}
@@ -206,15 +204,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. THE 5-STAGE PROCESS PIPELINE (Section 5) */}
+      {/* 2. THE 5-STAGE PROCESS PIPELINE */}
       <section className="bg-slate-900 text-white py-14 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8 text-center">
           <div>
             <span className="text-orange-400 font-bold text-xs uppercase tracking-widest">
-              END-TO-END CIVIC LIFECYCLE
+              {t('howItWorks', 'How CivicSeva Works')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Snap &rarr; AI Analyze &rarr; Route &rarr; Track &rarr; Verify
+              {t('processPipeline', 'Detect → Prioritize → Route → Act → Verify')}
             </h2>
             <p className="text-xs text-slate-400 mt-1 max-w-xl mx-auto">
               How CivicSeva replaces black-hole government complaints with transparent, verified civic resolution.
@@ -226,7 +224,7 @@ export default function HomePage() {
               <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-sm">
                 1
               </div>
-              <h3 className="font-bold text-white text-sm">Snap Evidence</h3>
+              <h3 className="font-bold text-white text-sm">{t('snap', 'Snap Evidence')}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Capture on-ground photos with automatic geolocation and Kolkata ward mapping.
               </p>
@@ -236,7 +234,7 @@ export default function HomePage() {
               <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-sm">
                 2
               </div>
-              <h3 className="font-bold text-white text-sm">AI Analysis</h3>
+              <h3 className="font-bold text-white text-sm">{t('aiAnalyze', 'AI Analyze')}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Vision models classify the issue, flag duplicates within 300m, and calculate a 0–100 priority score.
               </p>
@@ -246,7 +244,7 @@ export default function HomePage() {
               <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-sm">
                 3
               </div>
-              <h3 className="font-bold text-white text-sm">Smart Route</h3>
+              <h3 className="font-bold text-white text-sm">{t('route', 'Route to Authority')}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Direct matching with KMC Roads, SWM, Drainage, or Lighting divisions and official email generation.
               </p>
@@ -256,7 +254,7 @@ export default function HomePage() {
               <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-sm">
                 4
               </div>
-              <h3 className="font-bold text-white text-sm">Track &amp; Escalate</h3>
+              <h3 className="font-bold text-white text-sm">{t('track', 'Track Progress')}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Track crew mobilization transparently. Automatic escalation triggers if response exceeds 7 days.
               </p>
@@ -266,7 +264,7 @@ export default function HomePage() {
               <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
                 5
               </div>
-              <h3 className="font-bold text-white text-sm">Citizen Verify</h3>
+              <h3 className="font-bold text-white text-sm">{t('verify', 'Citizen Verify')}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Citizens inspect completed repairs using AI Before/After visual comparison before sign-off.
               </p>
@@ -275,7 +273,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. CORE INNOVATION FEATURE CARDS (Section 5 & 30) */}
+      {/* 3. CORE INNOVATION FEATURE CARDS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="text-center space-y-2">
           <span className="text-orange-600 font-bold text-xs uppercase tracking-widest">
@@ -304,7 +302,7 @@ export default function HomePage() {
               <Flame className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">
-              2. Smart Priority Scoring (0–100)
+              2. {t('priorityScore', 'Civic Priority Score')} (0–100)
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Calculates urgency using safety hazard, citizen impact, and proximity to schools, hospitals, and transit hubs so critical emergencies are never buried.
@@ -316,7 +314,7 @@ export default function HomePage() {
               <Layers className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">
-              3. Spatial Duplicate Clustering
+              3. {t('duplicateDetection', 'Duplicate Issue Detection')}
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Scans nearby existing reports within 300m. Citizens can confirm existing issues (&ldquo;I&rsquo;m facing this too&rdquo;) instead of generating 25 fragmented tickets.
@@ -340,7 +338,7 @@ export default function HomePage() {
               <FileText className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">
-              5. Official Grievance Generator
+              5. {t('officialEmailGen', 'Official Grievance Generator')}
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Drafts a formal, evidence-backed email to the Municipal Commissioner with exact GPS coordinates and citizen consent before sending.
@@ -352,7 +350,7 @@ export default function HomePage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">
-              6. AI Before/After Verification
+              6. {t('beforeAfterAi', 'AI Before/After Resolution Verification')}
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Authorities cannot close tickets unilaterally. Citizens upload after-photos, and an AI visual comparison engine audits whether the hazard was actually fixed.
@@ -361,7 +359,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. WHAT MAKES CIVICSEVA DIFFERENT? (Section 5) */}
+      {/* 4. WHAT MAKES CIVICSEVA DIFFERENT? */}
       <section className="bg-white border-y border-slate-200 py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto space-y-8">
           <div className="text-center space-y-2">
@@ -369,10 +367,13 @@ export default function HomePage() {
               PARADIGM SHIFT
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              What makes CivicSeva different?
+              {t('whatMakesDifferent', 'What makes CivicSeva different?')}
             </h2>
             <p className="text-sm text-slate-600 max-w-2xl mx-auto">
-              CivicSeva does not simply collect complaints. It converts citizen reports into structured civic incidents and follows them through resolution and citizen verification.
+              {t(
+                'differentDesc',
+                'CivicSeva does not simply collect complaints. It converts citizen reports into structured civic incidents and follows them through resolution and citizen verification.'
+              )}
             </p>
           </div>
 
@@ -449,13 +450,13 @@ export default function HomePage() {
               href="/report"
               className="px-6 py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-lg transition-transform hover:scale-105"
             >
-              Report a Civic Issue Now
+              {t('reportIssueCta', 'Report a Civic Issue Now')}
             </Link>
             <Link
               href="/map"
               className="px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700"
             >
-              Explore Kolkata Civic Map
+              {t('exploreMapCta', 'Explore Kolkata Civic Map')}
             </Link>
           </div>
         </div>

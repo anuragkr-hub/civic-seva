@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
 import { KOLKATA_WARDS } from '../../data/kolkataWards';
-import { KOLKATA_AUTHORITIES } from '../../data/authorities';
 import { Logo } from '../../components/Branding/Logo';
 import {
   Users,
@@ -16,11 +15,9 @@ import {
   Lock,
   Mail,
   User,
-  Phone,
-  Building,
-  MapPin,
-  CheckCircle2,
-  LogIn
+  LogIn,
+  AlertCircle,
+  UserPlus
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,10 +25,13 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '';
+  const tabParam = searchParams.get('tab');
 
   const { login, register } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(
+    tabParam === 'register' ? 'register' : 'login'
+  );
   const [selectedRole, setSelectedRole] = useState<UserRole>('citizen');
 
   // Form inputs
@@ -47,34 +47,38 @@ function LoginForm() {
     e.preventDefault();
     setErrorMessage('');
 
-    if (!emailOrPhone) {
-      setErrorMessage('Please provide an email or phone number.');
+    if (!emailOrPhone.trim()) {
+      setErrorMessage('Please provide an email address or mobile number.');
       return;
     }
 
-    if (activeTab === 'register' && !name) {
-      setErrorMessage('Please enter your full name.');
+    if (activeTab === 'register' && !name.trim()) {
+      setErrorMessage('Please enter your full name to register.');
       return;
     }
 
-    if (selectedRole === 'admin' && activeTab === 'login' && adminKey !== 'admin123' && adminKey !== 'kmcadmin' && adminKey !== '') {
-      // Allow flexible testing, but validate if entered
-    }
-
-    const details = {
-      name: name || (selectedRole === 'admin' ? 'KMC Administrator' : selectedRole === 'authority' ? 'KMC Executive Engineer' : 'Kolkata Citizen'),
-      emailOrPhone,
-      ward,
-      department
-    };
-
+    let res;
     if (activeTab === 'register') {
-      register(selectedRole, details);
+      res = register(selectedRole, {
+        name: name.trim(),
+        emailOrPhone: emailOrPhone.trim(),
+        password: password || 'password123',
+        ward,
+        department
+      });
     } else {
-      login(selectedRole, details);
+      res = login(selectedRole, {
+        emailOrPhone: emailOrPhone.trim(),
+        password: password || adminKey
+      });
     }
 
-    // Redirect to requested page or role default
+    if (!res.success) {
+      setErrorMessage(res.error || 'Authentication failed.');
+      return;
+    }
+
+    // Only redirect when authentication succeeds
     if (redirectUrl) {
       router.push(redirectUrl);
     } else {
@@ -84,30 +88,31 @@ function LoginForm() {
     }
   };
 
-  // Quick 1-Click Persona Logins
+  // Quick 1-Click Fast Persona Logins (Pre-seeded in demo registry)
   const handleQuickLogin = (role: UserRole) => {
+    setErrorMessage('');
     if (role === 'citizen') {
-      login('citizen', {
-        name: 'Suvro Mukherjee',
-        emailOrPhone: 'suvro.mukherjee@kolkata.in',
-        ward: 48
+      const res = login('citizen', {
+        emailOrPhone: 'suvro@kolkata.in'
       });
-      router.push(redirectUrl || '/citizen');
+      if (res.success) {
+        router.push(redirectUrl || '/citizen');
+      }
     } else if (role === 'authority') {
-      login('authority', {
-        name: 'Er. A. K. Sengupta',
-        emailOrPhone: 'roads.kmc.demo@kolkatamunicipalcorporation.gov.in.demo',
-        department: 'Civil Infrastructure & Roads',
-        ward: 48
+      const res = login('authority', {
+        emailOrPhone: 'roads.kmc.demo@kmcgov.in.demo'
       });
-      router.push(redirectUrl || '/authority');
+      if (res.success) {
+        router.push(redirectUrl || '/authority');
+      }
     } else {
-      login('admin', {
-        name: 'Chief Municipal Commissioner',
-        emailOrPhone: 'commissioner@kmcgov.in.demo',
-        department: 'Governance & Wards Administration'
+      const res = login('admin', {
+        emailOrPhone: 'admin@kmcgov.in.demo',
+        password: 'admin123'
       });
-      router.push(redirectUrl || '/admin');
+      if (res.success) {
+        router.push(redirectUrl || '/admin');
+      }
     }
   };
 
@@ -119,7 +124,7 @@ function LoginForm() {
           <Logo size="lg" className="justify-center" />
         </Link>
         <h1 className="text-2xl font-bold text-slate-900 mt-2">
-          {activeTab === 'login' ? 'Sign In to CivicSeva' : 'Register Citizen / Officer Account'}
+          {activeTab === 'login' ? 'Sign In to CivicSeva' : 'Register New Account'}
         </h1>
         <p className="text-xs text-slate-500">
           Access AI civic reporting, municipal routing, and verified resolution across Kolkata.
@@ -177,12 +182,15 @@ function LoginForm() {
         </button>
       </div>
 
-      {/* Login vs Register Switcher */}
+      {/* Login vs Register Card */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-soft space-y-5">
         <div className="flex border-b border-slate-100 pb-3 text-xs font-semibold gap-4">
           <button
             type="button"
-            onClick={() => setActiveTab('login')}
+            onClick={() => {
+              setActiveTab('login');
+              setErrorMessage('');
+            }}
             className={`pb-1 border-b-2 transition-colors ${
               activeTab === 'login'
                 ? 'border-orange-600 text-orange-600 font-bold'
@@ -193,7 +201,10 @@ function LoginForm() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('register')}
+            onClick={() => {
+              setActiveTab('register');
+              setErrorMessage('');
+            }}
             className={`pb-1 border-b-2 transition-colors ${
               activeTab === 'register'
                 ? 'border-orange-600 text-orange-600 font-bold'
@@ -204,9 +215,28 @@ function LoginForm() {
           </button>
         </div>
 
+        {/* Error Alert Box */}
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
-            {errorMessage}
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-2 animate-in fade-in">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <div className="leading-snug font-medium">{errorMessage}</div>
+            </div>
+            {activeTab === 'login' && errorMessage.includes('Not Registered') && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('register');
+                    setErrorMessage('');
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-orange-700 bg-white hover:bg-orange-50 px-3 py-1.5 rounded-lg border border-red-200 transition-colors shadow-xs"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Register {emailOrPhone} now &rarr;</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -215,14 +245,20 @@ function LoginForm() {
           {activeTab === 'register' && (
             <div>
               <label className="block text-slate-700 font-bold mb-1">
-                Full Name
+                Full Name <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   required
-                  placeholder={selectedRole === 'authority' ? 'Er. A. K. Sengupta' : selectedRole === 'admin' ? 'Administrator Name' : 'Suvro Mukherjee'}
+                  placeholder={
+                    selectedRole === 'authority'
+                      ? 'Er. A. K. Sengupta'
+                      : selectedRole === 'admin'
+                      ? 'Administrator Name'
+                      : 'Suvro Mukherjee'
+                  }
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-9 pr-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900"
@@ -234,17 +270,24 @@ function LoginForm() {
           <div>
             <label className="block text-slate-700 font-bold mb-1">
               {selectedRole === 'authority'
-                ? 'Official KMC Email or Employee ID'
+                ? 'Official KMC Email or Mobile Number'
                 : selectedRole === 'admin'
                 ? 'Admin Username / Email'
-                : 'Mobile Number or Email Address'}
+                : 'Mobile Number or Email Address'}{' '}
+              <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 required
-                placeholder={selectedRole === 'authority' ? 'officer@kmcgov.in.demo' : selectedRole === 'admin' ? 'admin@kmcgov.in.demo' : 'suvro@kolkata.in or +91-98300-12345'}
+                placeholder={
+                  selectedRole === 'authority'
+                    ? 'officer@kmcgov.in.demo'
+                    : selectedRole === 'admin'
+                    ? 'admin@kmcgov.in.demo'
+                    : 'suvro@kolkata.in or +91-98300-12345'
+                }
                 value={emailOrPhone}
                 onChange={(e) => setEmailOrPhone(e.target.value)}
                 className="w-full pl-9 pr-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900"
@@ -254,13 +297,15 @@ function LoginForm() {
 
           <div>
             <label className="block text-slate-700 font-bold mb-1">
-              Password / Passcode
+              {activeTab === 'login' && selectedRole === 'admin'
+                ? 'Admin Passcode (Demo: admin123)'
+                : 'Password / Passcode'}
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder={selectedRole === 'admin' ? 'admin123' : '••••••••'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900"
@@ -269,7 +314,7 @@ function LoginForm() {
           </div>
 
           {/* Citizen Ward Selection */}
-          {selectedRole === 'citizen' && (
+          {selectedRole === 'citizen' && activeTab === 'register' && (
             <div>
               <label className="block text-slate-700 font-bold mb-1">
                 Primary Kolkata Ward (1–144)
@@ -289,7 +334,7 @@ function LoginForm() {
           )}
 
           {/* KMC Officer Department Selection */}
-          {selectedRole === 'authority' && (
+          {selectedRole === 'authority' && activeTab === 'register' && (
             <div>
               <label className="block text-slate-700 font-bold mb-1">
                 KMC Department Division
@@ -309,22 +354,6 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Admin Security Key */}
-          {selectedRole === 'admin' && (
-            <div>
-              <label className="block text-slate-700 font-bold mb-1">
-                Administrative Passcode (Demo: admin123)
-              </label>
-              <input
-                type="text"
-                placeholder="admin123"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900"
-              />
-            </div>
-          )}
-
           <button
             type="submit"
             className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-md transition-transform hover:scale-[1.02] flex items-center justify-center gap-1.5"
@@ -338,10 +367,10 @@ function LoginForm() {
           </button>
         </form>
 
-        {/* 1-Click Fast Login Shortcuts */}
+        {/* 1-Click Fast Login Demo Shortcuts (Pre-registered) */}
         <div className="pt-4 border-t border-slate-100 space-y-2">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-            ⚡ Quick 1-Click Demo Login:
+            ⚡ Quick 1-Click Demo Accounts (Pre-Registered):
           </div>
           <div className="grid grid-cols-1 gap-2">
             <button
@@ -363,7 +392,7 @@ function LoginForm() {
             >
               <div>
                 <span className="font-bold text-slate-900">🛡️ KMC Officer:</span>
-                <span className="text-slate-500 ml-1.5">Executive Engineer (Roads Division)</span>
+                <span className="text-slate-500 ml-1.5">Er. A. K. Sengupta (Roads Division)</span>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-orange-600" />
             </button>

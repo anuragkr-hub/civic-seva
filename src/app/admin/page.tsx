@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminPage() {
-  const { resetAllData, incidents, isAuthenticated, role, login } = useApp();
+  const { resetAllData, incidents, isAuthenticated, role, login, t } = useApp();
   const [activeTab, setActiveTab] = useState<'authorities' | 'wards' | 'rules' | 'demo'>('authorities');
 
   if (!isAuthenticated || role !== 'admin') {
@@ -31,13 +31,16 @@ export default function AdminPage() {
         </div>
         <div>
           <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold uppercase tracking-wider">
-            Governance Clearance Required
+            {t('adminClearanceRequired', 'Governance Clearance Required')}
           </span>
           <h2 className="text-2xl font-bold text-slate-900 mt-2">
-            Municipal Administrative Console
+            {t('adminTitle', 'Municipal Administrative Console')}
           </h2>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-            Only designated municipal administrators can adjust priority algorithms, configure wards, or inspect system logs.
+            {t(
+              'adminSignInNotice',
+              'Only designated municipal administrators can adjust priority algorithms, configure wards, or inspect system logs.'
+            )}
           </p>
         </div>
 
@@ -46,16 +49,21 @@ export default function AdminPage() {
             href="/login?redirect=/admin"
             className="w-full block py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md transition-all hover:scale-105"
           >
-            Sign In with Admin Credentials &rarr;
+            {t('signIn', 'Sign In with Admin Credentials')} &rarr;
           </Link>
 
           <div className="pt-3 border-t border-slate-200">
             <button
               type="button"
-              onClick={() => login('admin', { name: 'Chief Municipal Commissioner', emailOrPhone: 'admin@kmcgov.in.demo' })}
+              onClick={() =>
+                login('admin', {
+                  emailOrPhone: 'admin@kmcgov.in.demo',
+                  password: 'admin123'
+                })
+              }
               className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-purple-50 hover:border-purple-300 border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 transition-colors"
             >
-              <span>⚡ 1-Click Fast Admin Demo Login</span>
+              <span>{t('quickAdminDemo', '⚡ 1-Click Fast Admin Demo Login')}</span>
             </button>
           </div>
         </div>
