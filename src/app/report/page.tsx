@@ -23,8 +23,11 @@ import {
   Upload,
   Sparkles,
   CheckCircle,
+  CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   MapPin,
+  Navigation,
   Shield,
   Mail,
   Copy,
@@ -102,12 +105,117 @@ export default function ReportPage() {
   const [detectedFeatures, setDetectedFeatures] = useState<string[]>([]);
   const [severity, setSeverity] = useState<IncidentSeverity>('critical');
 
-  // Location states
+  // Location states - starts empty as requested (not pre-filled)
   const [selectedWard, setSelectedWard] = useState<KolkataWardInfo>(KOLKATA_WARDS[0]);
-  const [address, setAddress] = useState('87/1 College Street, Bowbazar, Kolkata - 700073');
-  const [landmark, setLandmark] = useState('Calcutta University Centenary Building');
+  const [address, setAddress] = useState('');
+  const [landmark, setLandmark] = useState('');
   const [latitude, setLatitude] = useState(22.5744);
   const [longitude, setLongitude] = useState(88.3629);
+  const [isLocating, setIsLocating] = useState(false);
+  const [isGpsAcquired, setIsGpsAcquired] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<{
+    type: 'idle' | 'success' | 'denied' | 'error';
+    message: string;
+  }>({
+    type: 'idle',
+    message: ''
+  });
+
+  const handleRequestLiveLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      setLocationStatus({
+        type: 'error',
+        message: 'Geolocation is not supported by your browser. Please enter your location manually below.'
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    setLocationStatus({
+      type: 'idle',
+      message: ''
+    });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = Math.round(position.coords.accuracy || 15);
+
+        setLatitude(lat);
+        setLongitude(lng);
+        setIsGpsAcquired(true);
+        setIsLocating(false);
+
+        // Map to nearest of 144 Kolkata wards
+        const nearestWard = findNearestWard(lat, lng);
+        if (nearestWard) {
+          setSelectedWard(nearestWard);
+        }
+
+        // Fetch street address from OpenStreetMap Nominatim reverse geocoder
+        let detailedAddress = `${nearestWard?.locality || 'Kolkata'}, Ward ${nearestWard?.ward || 48}, Kolkata`;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data.display_name) {
+              detailedAddress = data.display_name;
+              const road = data.address?.road || data.address?.suburb || data.address?.neighbourhood;
+              if (road) {
+                setLandmark(`Near ${road}`);
+              }
+            }
+          }
+        } catch {
+          // Graceful fallback to ward locality
+        }
+
+        setAddress(detailedAddress);
+        if (!landmark && nearestWard?.majorLandmarks?.length) {
+          setLandmark(nearestWard.majorLandmarks[0]);
+        }
+
+        setLocationStatus({
+          type: 'success',
+          message: `✓ Live GPS Location acquired (Accuracy: ±${accuracy}m) • Mapped to Ward ${nearestWard?.ward} (${nearestWard?.locality})`
+        });
+      },
+      (error) => {
+        setIsLocating(false);
+        setIsGpsAcquired(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationStatus({
+            type: 'denied',
+            message: '⚠️ Location permission was denied. Please select your KMC Ward and enter your address manually below.'
+          });
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          setLocationStatus({
+            type: 'error',
+            message: '⚠️ GPS position is unavailable. Please enter the location manually below.'
+          });
+        } else if (error.code === error.TIMEOUT) {
+          setLocationStatus({
+            type: 'error',
+            message: '⚠️ GPS request timed out. Please enter the location manually below.'
+          });
+        } else {
+          setLocationStatus({
+            type: 'error',
+            message: '⚠️ Unable to retrieve live location. Please enter the location manually below.'
+          });
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
 
   // Duplicate states
   const [duplicateMatches, setDuplicateMatches] = useState<any[]>([]);
@@ -653,21 +761,65 @@ export default function ReportPage() {
       {/* STEP 3: Kolkata Location & Ward Pinning */}
       {currentStep === 3 && (
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-soft space-y-6">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-orange-600" />
-              Step 3: Kolkata Location & Ward Detection
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              CivicSeva automatically maps coordinates to Kolkata Municipal Corporation (KMC) Wards & Boroughs.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-orange-600" />
+                Step 3: Kolkata Location &amp; Ward Detection
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Detect your live GPS position or select your KMC Ward and enter the address manually.
+              </p>
+            </div>
+
+            {/* Live Location Trigger Button */}
+            <button
+              type="button"
+              onClick={handleRequestLiveLocation}
+              disabled={isLocating}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-60 shrink-0"
+            >
+              {isLocating ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Requesting GPS Permission...</span>
+                </>
+              ) : (
+                <>
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>📍 Use Current Live Location</span>
+                </>
+              )}
+            </button>
           </div>
+
+          {/* Location Status / Permission Feedback */}
+          {locationStatus.type === 'success' && (
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="font-medium">{locationStatus.message}</span>
+            </div>
+          )}
+
+          {locationStatus.type === 'denied' && (
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span className="font-medium">{locationStatus.message}</span>
+            </div>
+          )}
+
+          {locationStatus.type === 'error' && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <span className="font-medium">{locationStatus.message}</span>
+            </div>
+          )}
 
           {/* Interactive Ward Selector */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                KMC Ward & Locality
+                KMC Ward &amp; Locality
               </label>
               <select
                 value={selectedWard.ward}
@@ -677,8 +829,13 @@ export default function ReportPage() {
                     setSelectedWard(w);
                     setLatitude(w.coordinates.lat);
                     setLongitude(w.coordinates.lng);
-                    setAddress(`${w.locality}, Ward ${w.ward}, Kolkata`);
-                    setLandmark(w.majorLandmarks[0]);
+                    setIsGpsAcquired(false);
+                    if (!address) {
+                      setAddress(`${w.locality}, Ward ${w.ward}, Kolkata`);
+                    }
+                    if (!landmark) {
+                      setLandmark(w.majorLandmarks[0]);
+                    }
                   }
                 }}
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
@@ -697,6 +854,7 @@ export default function ReportPage() {
               </label>
               <input
                 type="text"
+                placeholder="e.g. Calcutta University, Shyambazar Metro, Gariahat Crossing"
                 value={landmark}
                 onChange={(e) => setLandmark(e.target.value)}
                 className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:outline-none"
@@ -710,6 +868,7 @@ export default function ReportPage() {
             </label>
             <input
               type="text"
+              placeholder="e.g. 87/1 College Street, Bowbazar, Kolkata - 700073"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:outline-none"
@@ -725,6 +884,17 @@ export default function ReportPage() {
                 <MapPin className="w-6 h-6" />
               </div>
               <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200 shadow-sm inline-block">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <span
+                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                      isGpsAcquired
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-orange-100 text-orange-800'
+                    }`}
+                  >
+                    {isGpsAcquired ? '📍 Live GPS Pinned' : '✏️ Selected KMC Ward'}
+                  </span>
+                </div>
                 <div className="font-bold text-slate-900 text-xs">
                   {selectedWard.locality} (Ward {selectedWard.ward})
                 </div>
@@ -748,12 +918,15 @@ export default function ReportPage() {
             </button>
             <button
               onClick={() => {
+                if (!address.trim()) {
+                  setAddress(`${selectedWard.locality}, Ward ${selectedWard.ward}, Kolkata`);
+                }
                 checkDuplicatesNow();
                 setCurrentStep(4);
               }}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold shadow"
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold shadow transition-all hover:scale-105"
             >
-              Scan Nearby Incidents
+              <span>Scan Nearby Incidents</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
